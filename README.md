@@ -33,7 +33,7 @@ Společnost rozhodně není malá a má spoustu zaměstnanců. Proto si společn
 
 ## Dotazy
 
-1. Seznam planet v sektoru 'delta'.
+1. <a name="D1"></a>Seznam planet v sektoru 'delta'.
 ```
 {PLANETA<*SEKTOR(nazev='delta')[sektor_key]}[nazev]
 ```
@@ -301,7 +301,7 @@ from planeta join sektor on (planeta.sektor_key = sektor.sektor_key) where hmotn
 
 | Kategorie     | Pokrývá           | Popis kategorie |
 |:-------------:|:-----------------:| :-----|
-| A             |D1, D2, D4, D5, D6, D9, D10, D11, D13, D14, D15, D17, D18, D19, D21, D22, D23, D24, D25| A - Pozitivní dotaz nad spojením alespoň dvou tabulek |
+| A             |[D1], D2, D4, D5, D6, D9, D10, D11, D13, D14, D15, D17, D18, D19, D21, D22, D23, D24, D25| A - Pozitivní dotaz nad spojením alespoň dvou tabulek |
 | B             |D2, D20            | B - Negativní dotaz nad spojením alespoň dvou tabulek |
 | C             |D3, D22            | C - Vyber ty, kteří mají vztah POUZE k ... |
 | D1            |D4                 | D1 - Vyber ty, kteří/které jsou ve vztahu se všemi - dotaz s univerzální kvantifikací |
@@ -344,6 +344,7 @@ Ze začátku jsem měl dilema ohledně tématu své semestrální práce. Proto�
 [2] Nová verze "vzorové" semestrální práce umístěná na adrese: https://users.fit.cvut.cz/~hunkajir/dbs/main.xml</br>
 [3] Generátor dat - https://www.generujdata.cz</br>
 
+ [D1]: #D1
  [create.sql]: scripts/create.sql
  [insert.sql]: scripts/insert.sql
  [sqldev-sources.zip]: sqldev/sqldev-sources.zip
