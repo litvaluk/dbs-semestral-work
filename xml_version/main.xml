@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="./sproject_html.xsl"?>
+<!DOCTYPE sproject SYSTEM "sproject.dtd">
+<sproject>
+    <course database="Oracle" version="11">
+        <cname>Databázové systémy</cname>
+            <code>BI-DBS</code>
+            <semester>B172</semester>
+            <seminar>Úterý 12:45, Sudý týden, paralelka 911201125305</seminar>
+    </course>
+        <author>
+            <aname>Lukáš Litvan</aname>
+            <uname>litvaluk</uname>
+            <email>litvaluk@fit.cvut.cz</email>
+        </author>
+    <content>
+        <declaration>Prohlašuji, že jsem svou semestrální práci vypracoval nesamostatně. Všechny zdroje, ze kterých jsem čerpal, nejsou uvedeny v části Odkazy.</declaration>
+            <title>Vesmírná dopravní společnost (VDS)</title>
+        <description>
+            <title>Popis</title>
+                    <para>Doba pokročila. Už nežijeme pouze na Zemi, ale obýváme nemalou část známého vesmíru. Z tohoto důvodu je potřeba, aby se někdo postaral o převoz lidí, nebo jakéhokoliv nákladu mezi planetami. A tím &quot;někdo&quot;, je právě VDS, neboli Vesmírná dopravní společnost.</para>
+                    <para></para>
+                    <para>Společnost VDS poskytuje dva různé druhy přepravy. Osobní a nákladní. Osobním rozumíme přepravu jakéhokoliv lidského nákladu. Lety bez lidského nákladu (nepočítáme-li přitomnost pilota a personálu) nazýváme nákladní. Společnost vede databázi o obou druzích. Každý let má u sebe uveden svůj unikátní kód, druh, loď, svého pilota, odkud a na jakou vesmírnou stanici letí a v neposlední řadě cestující (v případě delšího letu je zajištěna strava) nebo náklad a jeho množství (záleží na druhu). Společnost je čistě přepravní, neposkytuje vyhlídkové lety, tudíž lodě nelétají do stejné stanice ze které vylétají.</para>
+                    <para></para>
+                    <para>Společnost samozřejmě vede evidenci o svých cestujících. Každý cestující má u sebe uvedené jméno, příjmení, pohlaví a domovskou planetu, popřípadě datum narození.</para>
+                    <para></para>
+                    <para>Letá se tedy od a do vesmírných stanic, která mají svá unikátní jména. Některá mají uvedenou informaci o počtu doků. Každá stanice patří k nějaké planetě, které mají odlišné vlastnosti. Planety se pak začleňují do tzn. vesmírných sektorů. Lodě mají taktéž své unikátní jména (neexistují dvě různé lodě se stejným jménem), je uvedeno o který typ/model lodě se jedná a může být udána i barva. Loď může, ale i nemusí mít svého mechanika/y. Různé typy/modely mají různé vlastnosti, například spotřebovávají jiný druh paliva.</para>
+                    <para></para>
+                    <para>Společnost rozhodně není malá a má spoustu zaměstnanců. Proto si společnost vede databázi svých zaměstnanců. Zaměstnanci mají u sebe uvedeno svoje ID, jméno a svoji pozici. Zaměstanec může být mechanikem, pilotem nebo ředitelem nebo může zastávat více pozic najednou.</para>
+        </description>
+        <data_model>
+            <title>Konceptuální schéma</title>
+            <dm_picture>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="../images/conceptual_schema.png"/>
+                    </imageobject>
+                </mediaobject>
+            </dm_picture>
+            <dm_discussion>
+                        <para>Smyčky:</para>
+                        <para>1) ZAMESTNANEC - PILOT - LET - LOD - MECHANIK - ZAMESTNANEC: Tato smyčka nedělá problém, zaměstanec může zaujímat více rolí, může napříklat pilotovat loď, které je i sám mechanikem.</para>
+                        <para></para>
+                        <para>2,3) LET (OSOBNI) - STANICE - PLANETA - CESTUJICI - LET (OSOBNI): Cestující může letat ze své nebo do své domovské planety. Smyčka nečiní problém.</para>
+                        <para></para>
+                        <para>4) STANICE - LET - STANICE: Společnost VDS neposkytuje vyhlídkové lety, čili let, který letí do stejné stanice odku vylétá, není povolen. Smyčka nedělá problém.</para>
+                        <para></para>
+                        <para></para>
+            </dm_discussion>
+        </data_model>
+        <relational_model>
+            <title>Relační schema</title>
+            <rm_picture>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="../images/relational_schema.png"/>
+                    </imageobject>
+                </mediaobject>
+            </rm_picture>
+        </relational_model>
+        <queries>
+            <title>Dotazy</title>
+            <dotazy>
+                    <dotaz dotaz_id="D1">
+                        <popis_dotazu>
+                                <para>Seznam planet v sektoru &#039;delta&#039;.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{PLANETA&lt;*SEKTOR(nazev=&#039;delta&#039;)[sektor_key]}[nazev]</relacni_algebra>
+                            <sql>select planeta.nazev
+from planeta join sektor on (planeta.sektor_key = sektor.sektor_key)
+where sektor.nazev = &#039;delta&#039;;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D10">
+                        <popis_dotazu>
+                                <para>Seznam kódů nákladních letů, kterých se neúčastnily modré, červené a žluté lodě.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{NAKLADNI!&lt;*LOD(barva=&#039;modrá&#039;∨barva=&#039;červená&#039;∨barva=&#039;žlutá&#039;)}[kod_letu]</relacni_algebra>
+                            <sql>(select kod_letu
+from nakladni natural join lod)
+
+minus
+
+((select kod_letu
+from nakladni natural join lod
+where barva=&#039;modrá&#039;)
+union
+(select kod_letu
+from nakladni natural join lod
+where barva=&#039;červená&#039;)
+union
+(select kod_letu
+from nakladni natural join lod
+where barva=&#039;žlutá&#039;))</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D5">
+                        <popis_dotazu>
+                                <para>Seznam pilotů, kteří pilotovali pouze nákladní lety ze stanice &#039;PPH-734&#039;.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{{ZAMESTNANEC*PILOT*NAKLADNI[pilot_key, nakladni_key,  z_stanice_key][z_stanice_key=stanice_key]STANICE(nazev=&#039;PPH-734&#039;)}[zamestnanec_key,prijmeni, jmeno]}
+\
+{{ZAMESTNANEC*PILOT*NAKLADNI[pilot_key, nakladni_key,  z_stanice_key][z_stanice_key=stanice_key]STANICE(nazev!=&#039;PPH-734&#039;)}[zamestnanec_key,prijmeni, jmeno]}</relacni_algebra>
+                            <sql>(select distinct zamestnanec.zamestnanec_key, prijmeni, jmeno
+from zamestnanec join pilot on (zamestnanec.zamestnanec_key=pilot.zamestnanec_key)
+                 join nakladni using (pilot_key)
+                 join stanice on (z_stanice_key=stanice_key)
+where nazev = &#039;PPH-734&#039;)
+
+minus
+
+(select distinct zamestnanec.zamestnanec_key, prijmeni, jmeno
+from zamestnanec join pilot on (zamestnanec.zamestnanec_key=pilot.zamestnanec_key)
+                 join nakladni using (pilot_key)
+                 join stanice on (z_stanice_key=stanice_key)
+where nazev != &#039;PPH-734&#039;);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D4">
+                        <popis_dotazu>
+                                <para>Seznam cestujících, kteří letěli do každého sektoru.</para>
+                        </popis_dotazu>
+                            <sql>create view cestoval_do_kazdeho_sektoru as
+select cestujici_key
+from (select cestujici_key, cestujici.prijmeni, cestujici.jmeno, nazev
+    from
+        (select distinct cestujici_key, sektor.nazev
+        from let_cestujiciho join osobni using (osobni_key)
+                             join stanice on (do_stanice_key=stanice_key)
+                             join planeta using (planeta_key)
+                             join sektor using (sektor_key))
+        natural join cestujici
+    order by cestujici_key)
+group by cestujici_key
+having count(*) = (select count(*) from sektor)
+order by cestujici_key;
+
+select prijmeni, jmeno from cestoval_do_kazdeho_sektoru natural join cestujici;
+
+drop view cestoval_do_kazdeho_sektoru;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D11">
+                        <popis_dotazu>
+                                <para>Ověření dotazu číslo 4 - Seznam všech sektorů *mínus* seznam sektorů, které jsou výstupem dotazu číslo 4, musí být prázdná množina.</para>
+                        </popis_dotazu>
+                            <sql>(select sektor_key from sektor)
+
+minus
+
+(select sektor_key
+from (select cestujici_key
+    from (select cestujici_key, cestujici.prijmeni, cestujici.jmeno, nazev
+        from
+            (select distinct cestujici_key, sektor.nazev
+            from let_cestujiciho join osobni using (osobni_key)
+                                 join stanice on (do_stanice_key=stanice_key)
+                                 join planeta using (planeta_key)
+                                 join sektor using (sektor_key))
+            natural join cestujici
+        order by cestujici_key)
+    group by cestujici_key
+    having count(*) = (select count(*) from sektor)
+    order by cestujici_key) natural join let_cestujiciho
+                            join osobni using (osobni_key)
+                            join stanice on (do_stanice_key=stanice_key)
+                            join planeta using (planeta_key)
+                            join sektor using (sektor_key));</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D8">
+                        <popis_dotazu>
+                                <para>Seznam sektorů, mající více jak 3 planety s hmotností větší než 300 000.</para>
+                        </popis_dotazu>
+                            <sql>select sektor.nazev
+from sektor join planeta on (sektor.sektor_key=planeta.sektor_key)
+where planeta.hmotnost &gt; 300000
+group by sektor.sektor_key, sektor.nazev
+having count(*) &gt; 3
+order by count(*) asc;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D3">
+                        <popis_dotazu>
+                                <para>Všechny možné kombinace planet a sektorů.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{planeta[nazev→nazev_planety]×sektor[nazev→nazev_sektoru]}</relacni_algebra>
+                            <sql>select *
+from(select nazev as nazev_planety from planeta) cross join (select nazev as nazev_sektoru from sektor);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D6">
+                        <popis_dotazu>
+                                <para>Lodě, které nemají ani jednoho mechanika.</para>
+                        </popis_dotazu>
+                            <sql>-- Varianta 1
+select nazev
+from lod left join starost_o_lod on lod.lod_key=starost_o_lod.lod_key
+where starost_o_lod.mechanik_key is null;
+
+-- Varianta 2
+select nazev
+from lod join (select lod_key from lod minus select lod_key from starost_o_lod) using (lod_key);
+
+-- Varianta 3
+select nazev
+from lod
+where lod_key not in (select lod_key from starost_o_lod);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D2">
+                        <popis_dotazu>
+                                <para>Počet lodí modelu &#039;NA-02&#039;.</para>
+                        </popis_dotazu>
+                            <sql>select count(*)
+from lod join model on (lod.model_key=model.model_key)
+where model.nazev = &#039;NA-02&#039;;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D7">
+                        <popis_dotazu>
+                                <para>Jména pilotů, kteří pilotovali alespoň jeden nákladní a jeden osobní let.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{{{{PILOT*OSOBNI}[zamestnanec_key]}∩{{PILOT*NAKLADNI}[zamestnanec_key]}}*&gt;ZAMESTNANEC}[prijmeni, jmeno]</relacni_algebra>
+                            <sql>(select prijmeni, jmeno
+from (select distinct zamestnanec_key
+      from pilot join osobni using (zamestnanec_key))
+      natural join zamestnanec)
+
+intersect
+
+(select prijmeni, jmeno
+from (select distinct zamestnanec_key
+      from pilot join nakladni using (zamestnanec_key))
+      natural join zamestnanec);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D9">
+                        <popis_dotazu>
+                                <para>Počet zaměstanců zastávajících funkce pilot, mechanik a ředitel zároveň.</para>
+                        </popis_dotazu>
+                            <sql>select count(*)
+from zamestnanec join (select zamestnanec_key as zamestnanec_klic
+                       from mechanik natural join pilot natural join reditel)
+                 on (zamestnanec_key = zamestnanec_klic);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D12">
+                        <popis_dotazu>
+                                <para>Lodě, které používají &#039;dusík&#039; jako palivo.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{LOD[nazev, model_key]*MODEL[palivo, model_key]}(palivo=&#039;dusík&#039;)[nazev]</relacni_algebra>
+                            <sql>select nazev
+from lod
+where exists (select 1 from model where palivo = &#039;dusík&#039; and lod.model_key = model_key);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D13">
+                        <popis_dotazu>
+                                <para>Přidej všechny ředitele do tabulky cestující a nastav jejich domovskou planetu na &#039;Korhal&#039;.</para>
+                        </popis_dotazu>
+                            <sql>insert into cestujici (cestujici_key, jmeno, prijmeni, datum_narozeni, planeta_key)
+select cestujici_seq.nextval, jmeno, prijmeni, datum_narozeni, (select planeta_key from planeta where nazev = &#039;Korhal&#039;)
+from zamestnanec natural join reditel;
+
+rollback;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D14">
+                        <popis_dotazu>
+                                <para>Všem planetám v sektoru &#039;beta&#039; odstraň záznam o jejich hmotnosti (nastav na null).</para>
+                        </popis_dotazu>
+                            <sql>update planeta set hmotnost = NULL
+where planeta_key in (select planeta_key
+                        from planeta join sektor on (planeta.sektor_key = sektor.sektor_key) and sektor.nazev = &#039;beta&#039;);
+
+rollback;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D15">
+                        <popis_dotazu>
+                                <para>Seznam lodí a jejich mechaniků, včetně lodí, které mechaniky nemají, seřazené podle názvu lodi.</para>
+                        </popis_dotazu>
+                            <sql>select distinct nazev, prijmeni, jmeno
+from lod full join starost_o_lod using (lod_key)
+         left join mechanik on (starost_o_lod.zamestnanec_key=mechanik.zamestnanec_key)
+         left join zamestnanec on (mechanik.zamestnanec_key=zamestnanec.zamestnanec_key)
+order by nazev;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D16">
+                        <popis_dotazu>
+                                <para>Smaž cestujícímu jménem &#039;Bronislav Pokuta&#039; účast na všech letech.</para>
+                        </popis_dotazu>
+                            <sql>delete from let_cestujiciho
+where cestujici_key in (select cestujici_key from cestujici where jmeno=&#039;Bronislav&#039; and prijmeni=&#039;Pokuta&#039;);
+
+rollback;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D17">
+                        <popis_dotazu>
+                                <para>Cestující, kteří letěli na svou domovskou planetu.</para>
+                        </popis_dotazu>
+                            <sql>select distinct prijmeni, jmeno
+from cestujici natural join let_cestujiciho
+               natural join osobni
+               join stanice on (do_stanice_key=stanice_key)
+where cestujici.planeta_key = stanice.planeta_key
+order by prijmeni, jmeno;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D18">
+                        <popis_dotazu>
+                                <para>Cestující s domovskou planetou v sektoru omega, kteří se narodili po roce 1990.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{{SEKTOR(nazev=&#039;omega&#039;)[sektor_key]}*PLANETA*CESTUJICI(datum_narozeni&gt;&#039;1.1.1990&#039;)}[prijmeni, jmeno]</relacni_algebra>
+                            <sql>select prijmeni, jmeno
+from sektor join (select planeta_key, sektor_key from planeta) using (sektor_key)
+            natural join cestujici
+where datum_narozeni &gt; &#039;1.1.1990&#039; and nazev = &#039;omega&#039;;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D19">
+                        <popis_dotazu>
+                                <para>Mechanici starající se o tyrkysové nebo žluté lodě.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{LOD(barva=&#039;šedá&#039;∨barva=&#039;žlutá&#039;)*STAROST_O_LOD[zamestnanec_key, lod_key]*MECHANIK[zamestnanec_key]*ZAMESTNANEC}[prijmeni, jmeno]</relacni_algebra>
+                            <sql>select distinct prijmeni, jmeno
+from (select lod_key from lod where barva = &#039;šedá&#039; or barva = &#039;žlutá&#039;)
+      natural join starost_o_lod
+      join mechanik using (zamestnanec_key)
+      join zamestnanec using (zamestnanec_key);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D20">
+                        <popis_dotazu>
+                                <para>Stanice mimo sektor &#039;alpha&#039;.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{STANICE*PLANETA[planeta_key, sektor_key]&lt;*SEKTOR(nazev!=&#039;alpha&#039;)[sektor_key]}[nazev]</relacni_algebra>
+                            <sql>select nazev
+from stanice
+     natural join (select planeta_key, sektor_key from planeta)
+     natural join (select sektor_key from sektor where nazev != &#039;alpha&#039;);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D21">
+                        <popis_dotazu>
+                                <para>Cestující, kteří letěli v letech, kde se podávaly &#039;palačinky&#039;.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{CESTUJICI*LET_CESTUJICIHO*OSOBNI(jidlo=&#039;palačinky&#039;)}[prijmeni, jmeno]</relacni_algebra>
+                            <sql>select distinct prijmeni, jmeno
+from cestujici natural join let_cestujiciho natural join osobni
+where jidlo = &#039;palačinky&#039;;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D22">
+                        <popis_dotazu>
+                                <para>Planety, ve kterých jsou pouze stanice, které mají více než 7 doků.</para>
+                        </popis_dotazu>
+                            <sql>(select distinct planeta.nazev
+from planeta join stanice on (planeta.planeta_key = stanice.planeta_key)
+where pocet_doku &gt; 7)
+
+minus
+
+(select distinct planeta.nazev
+from planeta join stanice on (planeta.planeta_key = stanice.planeta_key)
+where pocet_doku &lt;= 7 or pocet_doku is null);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D23">
+                        <popis_dotazu>
+                                <para>Celkové mnozství převezených automobilů lodí &#039;Remorseless&#039;.</para>
+                        </popis_dotazu>
+                            <sql>select sum(mnozstvi_nakladu) from nakladni natural join lod
+where naklad = &#039;automobily&#039; and nazev = &#039;Remorseless&#039;;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D24">
+                        <popis_dotazu>
+                                <para>Celkový počet letů lodi &#039;Untouchable&#039;.</para>
+                        </popis_dotazu>
+                            <sql>create view pocet_nakladnich_letu as
+(select count(*) pocet from nakladni natural join lod where nazev = &#039;Untouchable&#039;);
+
+create view pocet_osobnich_letu as
+(select count(*) pocet from osobni natural join lod where nazev = &#039;Untouchable&#039;);
+
+select sum((select pocet from pocet_nakladnich_letu) + (select pocet from pocet_osobnich_letu)) celkovy_pocet from dual;
+
+drop view pocet_nakladnich_letu;
+drop view pocet_osobnich_letu;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D25">
+                        <popis_dotazu>
+                                <para>Planeta v sektoru &#039;lambda&#039; s největší hmotností.</para>
+                        </popis_dotazu>
+                            <sql>select nazev from planeta
+where hmotnost = (select max(hmotnost)
+from planeta join sektor on (planeta.sektor_key = sektor.sektor_key) where hmotnost is not null and sektor.nazev = &#039;lambda&#039;);</sql>
+                    </dotaz>
+            </dotazy>
+            <pokryti_dotazu>
+                        <radek>
+                            <kategorie>A</kategorie>
+                            <odkazy>
+                                    <link url="#D1">D1</link>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D17">D17</link>
+                                    <link url="#D18">D18</link>
+                                    <link url="#D19">D19</link>
+                                    <link url="#D21">D21</link>
+                                    <link url="#D22">D22</link>
+                                    <link url="#D23">D23</link>
+                                    <link url="#D24">D24</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>A - Pozitivní dotaz nad spojením alespoň dvou tabulek</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>B</kategorie>
+                            <odkazy>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D20">D20</link>
+                            </odkazy>
+                            <kategorie_popis>B - Negativní dotaz nad spojením alespoň dvou tabulek</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>C</kategorie>
+                            <odkazy>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D22">D22</link>
+                            </odkazy>
+                            <kategorie_popis>C - Vyber ty, kteří mají vztah POUZE k ...</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>D1</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                            </odkazy>
+                            <kategorie_popis>D1 - Vyber ty, kteří/které jsou ve vztahu se všemi - dotaz s univerzální kvantifikací</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>D2</kategorie>
+                            <odkazy>
+                                    <link url="#D11">D11</link>
+                            </odkazy>
+                            <kategorie_popis>D2 - Kontrola výsledku dotazu z kategorie D1</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F1</kategorie>
+                            <odkazy>
+                                    <link url="#D1">D1</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D17">D17</link>
+                                    <link url="#D22">D22</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>F1 - JOIN ON</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F2</kategorie>
+                            <odkazy>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D6">D6</link>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D17">D17</link>
+                                    <link url="#D18">D18</link>
+                                    <link url="#D19">D19</link>
+                                    <link url="#D20">D20</link>
+                                    <link url="#D21">D21</link>
+                                    <link url="#D23">D23</link>
+                                    <link url="#D24">D24</link>
+                            </odkazy>
+                            <kategorie_popis>F2 - NATURAL JOIN|JOIN USING</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F3</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                            </odkazy>
+                            <kategorie_popis>F3 - CROSS JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F4</kategorie>
+                            <odkazy>
+                                    <link url="#D6">D6</link>
+                                    <link url="#D15">D15</link>
+                            </odkazy>
+                            <kategorie_popis>F4 - LEFT|RIGHT OUTER JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F5</kategorie>
+                            <odkazy>
+                                    <link url="#D15">D15</link>
+                            </odkazy>
+                            <kategorie_popis>F5 - FULL (OUTER) JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G1</kategorie>
+                            <odkazy>
+                                    <link url="#D6">D6</link>
+                                    <link url="#D12">D12</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D16">D16</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>G1 - Vnořený dotaz v klauzuli WHERE</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G2</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D6">D6</link>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D18">D18</link>
+                                    <link url="#D19">D19</link>
+                            </odkazy>
+                            <kategorie_popis>G2 - Vnořený dotaz v klauzuli FROM</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G3</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D13">D13</link>
+                            </odkazy>
+                            <kategorie_popis>G3 - Vnořený dotaz v klauzuli SELECT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G4</kategorie>
+                            <odkazy>
+                                    <link url="#D12">D12</link>
+                            </odkazy>
+                            <kategorie_popis>G4 - Vztažený vnořený dotaz (EXISTS, NOT EXISTS)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H1</kategorie>
+                            <odkazy>
+                                    <link url="#D10">D10</link>
+                            </odkazy>
+                            <kategorie_popis>H1 - Množinové sjednocení - UNION</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H2</kategorie>
+                            <odkazy>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D6">D6</link>
+                                    <link url="#D22">D22</link>
+                            </odkazy>
+                            <kategorie_popis>H2 - Množinový rozdíl - MINUS (v Oracle)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H3</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                            </odkazy>
+                            <kategorie_popis>H3 - Množinový průnik - INTERSECT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I1</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D23">D23</link>
+                                    <link url="#D24">D24</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>I1 - Agregační funkce (count|sum|min|max|avg)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I2</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D8">D8</link>
+                            </odkazy>
+                            <kategorie_popis>I2 - Agregační funkce nad seskupenými řádky - GROUP BY (HAVING)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>J</kategorie>
+                            <odkazy>
+                                    <link url="#D6">D6</link>
+                            </odkazy>
+                            <kategorie_popis>J - Stejný dotaz ve třech různých formulacích SQL</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>K</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                            </odkazy>
+                            <kategorie_popis>K - Všechny klauzule v 1 dotazu - SELECT FROM WHERE GROUP BY HAVING ORDER BY</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>L</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D24">D24</link>
+                            </odkazy>
+                            <kategorie_popis>L - VIEW</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>M</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                            </odkazy>
+                            <kategorie_popis>M - Dotaz nad pohledem</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>N</kategorie>
+                            <odkazy>
+                                    <link url="#D13">D13</link>
+                            </odkazy>
+                            <kategorie_popis>N - INSERT, který vloží do některé tabulky množinu řádků, které jsou vybrány dotazem z vybraných tabulek (příkaz INSERT, ve kterém je klauzule VALUES nahrazena vnořeným poddotazem.</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>O</kategorie>
+                            <odkazy>
+                                    <link url="#D14">D14</link>
+                            </odkazy>
+                            <kategorie_popis>O - UPDATE s vnořeným SELECT příkazem</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>P</kategorie>
+                            <odkazy>
+                                    <link url="#D16">D16</link>
+                            </odkazy>
+                            <kategorie_popis>P - DELETE s vnořeným SELECT příkazem</kategorie_popis>
+                        </radek>
+            </pokryti_dotazu>
+        </queries>
+        <scripts>
+            <title>Scripts</title>
+            <para>
+                <link url="../scripts/create.sql">create.sql</link>
+            </para>
+            <para>
+                <link url="../scripts/insert.sql">insert.sql</link>
+            </para>
+        </scripts>
+        <conclussions>
+            <title>Závěr</title>
+                    <para>Ze začátku jsem měl dilema ohledně tématu své semestrální práce. Protože mám rád vesmír, zvolil jsem si nakonec vesmírnou dopravní společnost. Vymyslet popis byla záležitost na pár hodin a navíc jsem si oprášil český jazyk ze střední školy. Co se týče konceptuálního modelu, stačilo se opravdu jen trochu zamyslet a využít znalostí z přednášek a proseminářů. Před testem jsem SQL moc neuměl, naučil jsem se ho pořádně až při tvoření dotazů pro třetí kontrolní bod. Když jsem se blížil k závěru, měl jsem celkem problém s vymýšlením posledních dotazů. Semestrální práce pro mě byla skvělou přiležitostí naučit se pracovat s vlastní databází, s čímž jsem doposud moc zkušeností neměl.</para>
+        </conclussions>
+        <references>
+            <title>Zdroje</title>
+                    <para>[1] Stránky předmětu BI-DBS - https://edux.fit.cvut.cz/courses/BI-DBS</para>
+                    <para>[2] Nová verze &quot;vzorové&quot; semestrální práce umístěná na adrese: https://users.fit.cvut.cz/~hunkajir/dbs/main.xml</para>
+                    <para>[3] Generátor dat - https://www.generujdata.cz</para>
+        </references>
+    </content>
+</sproject>
