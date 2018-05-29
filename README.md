@@ -42,7 +42,7 @@ select planeta.nazev
 from planeta join sektor on (planeta.sektor_key = sektor.sektor_key)
 where sektor.nazev = 'delta';
 ```
-2. Seznam kódů nákladních letů, kterých se neúčastnily modré, červené a žluté lodě.
+2. <a name="D2"></a>Seznam kódů nákladních letů, kterých se neúčastnily modré, červené a žluté lodě.
 ```
 {NAKLADNI!<*LOD(barva='modrá'∨barva='červená'∨barva='žlutá')}[kod_letu]
 ```
@@ -62,7 +62,7 @@ union
 from nakladni natural join lod
 where barva='žlutá'))
 ```
-3. Seznam pilotů, kteří pilotovali pouze nákladní lety ze stanice 'PPH-734'.
+3. <a name="D3"></a>Seznam pilotů, kteří pilotovali pouze nákladní lety ze stanice 'PPH-734'.
 ```
 {{ZAMESTNANEC*PILOT*NAKLADNI[pilot_key, nakladni_key,  z_stanice_key][z_stanice_key=stanice_key]STANICE(nazev='PPH-734')}[zamestnanec_key,prijmeni, jmeno]}
 \
@@ -81,7 +81,7 @@ from zamestnanec join pilot on (zamestnanec.zamestnanec_key = pilot.zamestnanec_
                     join stanice on (z_stanice_key = stanice_key)
 where nazev != 'PPH-734');
 ```
-4. Seznam cestujících, kteří letěli do každého sektoru.
+4. <a name="D4"></a>Seznam cestujících, kteří letěli do každého sektoru.
 ```sql
 create view cestoval_do_kazdeho_sektoru as
 select cestujici_key
@@ -99,7 +99,7 @@ order by cestujici_key;
 select prijmeni, jmeno from cestoval_do_kazdeho_sektoru natural join cestujici;
 drop view cestoval_do_kazdeho_sektoru;
 ```
-5. Ověření dotazu číslo 4 - Seznam všech sektorů mínus seznam sektorů, které jsou výstupem dotazu číslo 4, musí být prázdná množina.
+5. <a name="D5"></a>Ověření dotazu číslo 4 - Seznam všech sektorů mínus seznam sektorů, které jsou výstupem dotazu číslo 4, musí být prázdná množina.
 ```sql
 (select sektor_key from sektor)
 minus
@@ -121,7 +121,7 @@ from (select cestujici_key
                             join planeta using (planeta_key)
                             join sektor using (sektor_key));
 ```
-6. Seznam sektorů, mající více jak 3 planety s hmotností větší než 300 000.
+6. <a name="D6"></a>Seznam sektorů, mající více jak 3 planety s hmotností větší než 300 000.
 ```sql
 select sektor.nazev
 from sektor join planeta on (sektor.sektor_key = planeta.sektor_key)
@@ -130,7 +130,7 @@ group by sektor.sektor_key, sektor.nazev
 having count(*) > 3
 order by count(*) asc;
 ```
-7. Všechny možné kombinace planet a sektorů.
+7. <a name="D7"></a>Všechny možné kombinace planet a sektorů.
 ```
 {planeta[nazev→nazev_planety]×sektor[nazev→nazev_sektoru]}
 ```
@@ -138,7 +138,7 @@ order by count(*) asc;
 select *
 from (select nazev as nazev_planety from planeta) cross join (select nazev as nazev_sektoru from sektor);
 ```
-8. Lodě, které nemají ani jednoho mechanika.
+8. <a name="D8"></a>Lodě, které nemají ani jednoho mechanika.
 ```sql
 -- Varianta 1
 select nazev
@@ -152,13 +152,13 @@ select nazev
 from lod
 where lod_key not in (select lod_key from starost_o_lod);
 ```
-9. Počet lodí modelu 'NA-02'.
+9. <a name="D9"></a>Počet lodí modelu 'NA-02'.
 ```sql
 select count(*)
 from lod join model on (lod.model_key = model.model_key)
 where model.nazev = 'NA-02';
 ```
-10. Jména pilotů, kteří pilotovali alespoň jeden nákladní a jeden osobní let.
+10. <a name="D10"></a>Jména pilotů, kteří pilotovali alespoň jeden nákladní a jeden osobní let.
 ```
 {{{{PILOT*OSOBNI}[zamestnanec_key]}∩{{PILOT*NAKLADNI}[zamestnanec_key]}}*>ZAMESTNANEC}[prijmeni, jmeno]
 ```
@@ -173,14 +173,14 @@ intersect
           from pilot join nakladni using (zamestnanec_key))
           natural join zamestnanec);
 ```
-11. Počet zaměstanců zastávajících funkce pilot, mechanik a ředitel zároveň.
+11. <a name="D11"></a>Počet zaměstanců zastávajících funkce pilot, mechanik a ředitel zároveň.
 ```sql
 select count(*)
 from zamestnanec join (select zamestnanec_key as zamestnanec_klic
                            from mechanik natural join pilot natural join reditel)
                            on (zamestnanec_key = zamestnanec_klic);
 ```
-12. Lodě, které používají 'dusík' jako palivo.
+12. <a name="D12"></a>Lodě, které používají 'dusík' jako palivo.
 ```
 {LOD[nazev, model_key]*MODEL[palivo, model_key]}(palivo='dusík')[nazev]
 ```
@@ -189,21 +189,21 @@ select nazev
 from lod
 where exists (select 1 from model where palivo = 'dusík' and lod.model_key = model_key);
 ```
-13. Přidej všechny ředitele do tabulky cestující a nastav jejich domovskou planetu na 'Korhal'.
+13. <a name="D13"></a>Přidej všechny ředitele do tabulky cestující a nastav jejich domovskou planetu na 'Korhal'.
 ```sql
 insert into cestujici (cestujici_key, jmeno, prijmeni, datum_narozeni, planeta_key)
 select cestujici_seq.nextval, jmeno, prijmeni, datum_narozeni, (select planeta_key from planeta where nazev = 'Korhal')
 from zamestnanec natural join reditel;
 rollback;
 ```
-14. Všem planetám v sektoru 'beta' odstraň záznam o jejich hmotnosti (nastav na null).
+14. <a name="D14"></a>Všem planetám v sektoru 'beta' odstraň záznam o jejich hmotnosti (nastav na null).
 ```sql
 update planeta set hmotnost = NULL
 where planeta_key in (select planeta_key
                           from planeta join sektor on (planeta.sektor_key = sektor.sektor_key) and sektor.nazev = 'beta');
 rollback;
 ```
-15. Seznam lodí a jejich mechaniků, včetně lodí, které mechaniky nemají, seřazené podle názvu lodi.
+15. <a name="D15"></a>Seznam lodí a jejich mechaniků, včetně lodí, které mechaniky nemají, seřazené podle názvu lodi.
 ```sql
 select distinct nazev, prijmeni, jmeno
 from lod full join starost_o_lod using (lod_key)
@@ -211,13 +211,13 @@ from lod full join starost_o_lod using (lod_key)
                   left join zamestnanec on (mechanik.zamestnanec_key = zamestnanec.zamestnanec_key)
 order by nazev;
 ```
-16. Smaž cestujícímu jménem 'Bronislav Pokuta' účast na všech letech.
+16. <a name="D16"></a>Smaž cestujícímu jménem 'Bronislav Pokuta' účast na všech letech.
 ```sql
 delete from let_cestujiciho
 where cestujici_key in (select cestujici_key from cestujici where jmeno='Bronislav' and prijmeni='Pokuta');
 rollback;
 ```
-17. Cestující, kteří letěli na svou domovskou planetu.
+17. <a name="D17"></a>Cestující, kteří letěli na svou domovskou planetu.
 ```sql
 select distinct prijmeni, jmeno
 from cestujici natural join let_cestujiciho
@@ -226,7 +226,7 @@ from cestujici natural join let_cestujiciho
 where cestujici.planeta_key = stanice.planeta_key
 order by prijmeni, jmeno;
 ```
-18. Cestující s domovskou planetou v sektoru omega, kteří se narodili po roce 1990.
+18. <a name="D18"></a>Cestující s domovskou planetou v sektoru omega, kteří se narodili po roce 1990.
 ```
 {{SEKTOR(nazev='omega')[sektor_key]}*PLANETA*CESTUJICI(datum_narozeni>'1.1.1990')}[prijmeni, jmeno]
 ```
@@ -236,7 +236,7 @@ from sektor join (select planeta_key, sektor_key from planeta) using (sektor_key
                 natural join cestujici
 where datum_narozeni > '1.1.1990' and nazev = 'omega';
 ```
-19. Mechanici starající se o tyrkysové nebo žluté lodě.
+19. <a name="D19"></a>Mechanici starající se o tyrkysové nebo žluté lodě.
 ```
 {LOD(barva='šedá'∨barva='žlutá')*STAROST_O_LOD[zamestnanec_key, lod_key]*MECHANIK[zamestnanec_key]*ZAMESTNANEC}[prijmeni, jmeno]
 ```
@@ -247,7 +247,7 @@ from (select lod_key from lod where barva = 'šedá' or barva = 'žlutá')
           join mechanik using (zamestnanec_key)
           join zamestnanec using (zamestnanec_key);
 ```
-20. Stanice mimo sektor 'alpha'.
+20. <a name="D20"></a>Stanice mimo sektor 'alpha'.
 ```
 {STANICE*PLANETA[planeta_key, sektor_key]<*SEKTOR(nazev!='alpha')[sektor_key]}[nazev]
 ```
@@ -256,7 +256,7 @@ select nazev
 from stanice natural join (select planeta_key, sektor_key from planeta)
                  natural join (select sektor_key from sektor where nazev != 'alpha');
 ```
-21. Cestující, kteří letěli v letech, kde se podávaly 'palačinky'.
+21. <a name="D21"></a>Cestující, kteří letěli v letech, kde se podávaly 'palačinky'.
 ```
 {CESTUJICI*LET_CESTUJICIHO*OSOBNI(jidlo='palačinky')}[prijmeni, jmeno]
 ```
@@ -265,7 +265,7 @@ select distinct prijmeni, jmeno
 from cestujici natural join let_cestujiciho natural join osobni
 where jidlo = 'palačinky';
 ```
-22. Planety, ve kterých jsou pouze stanice, které mají více než 7 doků.
+22. <a name="D22"></a>Planety, ve kterých jsou pouze stanice, které mají více než 7 doků.
 ```sql
 (select distinct planeta.nazev
 from planeta join stanice on (planeta.planeta_key = stanice.planeta_key)
@@ -275,12 +275,12 @@ minus
 from planeta join stanice on (planeta.planeta_key = stanice.planeta_key)
 where pocet_doku <= 7 or pocet_doku is null);
 ```
-23. Celkové mnozství převezených automobilů lodí 'Remorseless'.
+23. <a name="D23"></a>Celkové mnozství převezených automobilů lodí 'Remorseless'.
 ```sql
 select sum(mnozstvi_nakladu) from nakladni natural join lod
 where naklad = 'automobily' and nazev = 'Remorseless';
 ```
-24. Celkový počet letů lodi 'Untouchable'.
+24. <a name="D24"></a>Celkový počet letů lodi 'Untouchable'.
 ```sql
 create view pocet_nakladnich_letu as
 (select count(*) pocet from nakladni natural join lod where nazev = 'Untouchable');
@@ -290,7 +290,7 @@ select sum((select pocet from pocet_nakladnich_letu) + (select pocet from pocet_
 drop view pocet_nakladnich_letu;
 drop view pocet_osobnich_letu;
 ```
-25. Planeta v sektoru 'lambda' s největší hmotností.
+25. <a name="D25"></a>Planeta v sektoru 'lambda' s největší hmotností.
 ```sql
 select nazev from planeta
 where hmotnost = (select max(hmotnost)
@@ -300,33 +300,33 @@ from planeta join sektor on (planeta.sektor_key = sektor.sektor_key) where hmotn
 ## Tabulka pokrytí kategorií SQL příkazů
 
 | Kategorie     | Pokrývá           | Popis kategorie |
-|:-------------:|:-----------------:| :-----|
-| A             |[D1], D2, D4, D5, D6, D9, D10, D11, D13, D14, D15, D17, D18, D19, D21, D22, D23, D24, D25| A - Pozitivní dotaz nad spojením alespoň dvou tabulek |
-| B             |D2, D20            | B - Negativní dotaz nad spojením alespoň dvou tabulek |
-| C             |D3, D22            | C - Vyber ty, kteří mají vztah POUZE k ... |
-| D1            |D4                 | D1 - Vyber ty, kteří/které jsou ve vztahu se všemi - dotaz s univerzální kvantifikací |
-| D2            |D5                 | D2 - Kontrola výsledku dotazu z kategorie D1 |
-| F1            |D1, D3, D4, D5, D6, D9, D11, D14, D17, D22, D25| F1 - JOIN ON |
-| F2            |D2, D3, D4, D5, D8, D10, D11, D13, D15, D17, D18, D19, D20, D21, D23, D24| F2 - NATURAL JOIN, JOIN USING |
-| F3            |D7                 | F3 - CROSS JOIN |
-| F4            |D8, D15            | F4 - LEFT, RIGHT OUTER JOIN |
-| F5            |D15                | F5 - FULL (OUTER) JOIN |
-| G1            |D8, D12, D14, D16, D25| G1 - Vnořený dotaz v klauzuli WHERE |
-| G2            |D4, D5, D8, D10, D11, D18, D19| G2 - Vnořený dotaz v klauzuli FROM |
-| G3            |D7, D13            | G3 - Vnořený dotaz v klauzuli SELECT |
-| G4            |D12                | G4 - Vztažený vnořený dotaz (EXISTS, NOT EXISTS) |
-| H1            |D2                 | H1 - Množinové sjednocení - UNION |
-| H2            |D2, D3, D5, D8, D22| H2 - Množinový rozdíl - MINUS (v Oracle) |
-| H3            |D10                | H3 - Množinový průnik - INTERSECT |
-| I1            |D4, D5, D6, D9, D11, D23, D24, D25| I1 - Agregační funkce (count,sum,min,max,avg) |
-| I2            |D4, D5, D6         | I2 - Agregační funkce nad seskupenými řádky - GROUP BY (HAVING) |
-| J             |D8                 | J - Stejný dotaz ve třech různých formulacích SQL |
-| K             |D6                 | K - Všechny klauzule v 1 dotazu - SELECT FROM WHERE GROUP BY HAVING ORDER BY |
-| L             |D4, D24            | L - VIEW |
-| M             |D4                 | M - Dotaz nad pohledem |
-| N             |D13                | N - INSERT, který vloží do některé tabulky množinu řádků, které jsou vybrány dotazem z vybraných tabulek (příkaz INSERT, ve kterém je klauzule VALUES nahrazena vnořeným poddotazem. |
-| O             |D14                | O - UPDATE s vnořeným SELECT příkazem |
-| P             |D16                | P - DELETE s vnořeným SELECT příkazem |
+|:-------------|:-----------------| :-----|
+| A             |[D1], [D2], [D4], [D5], [D6], [D9], [D10], [D11], [D13], [D14], [D15], [D17], [D18], [D19], [D21], [D22], [D23], [D24], [D25]| A - Pozitivní dotaz nad spojením alespoň dvou tabulek |
+| B             |[D2], [D20]          | B - Negativní dotaz nad spojením alespoň dvou tabulek |
+| C             |[D3], [D22]          | C - Vyber ty, kteří mají vztah POUZE k ... |
+| D1            |[D4]                 | D1 - Vyber ty, kteří/které jsou ve vztahu se všemi - dotaz s univerzální kvantifikací |
+| D2            |[D5]                 | D2 - Kontrola výsledku dotazu z kategorie D1 |
+| F1            |[D1], [D3], [D4], [D5], [D6], [D9], [D11], [D14], [D17], [D22], [D25]| F1 - JOIN ON |
+| F2            |[D2], [D3], [D4], [D5], [D8], [D10], [D11], [D13], [D15], [D17], [D18], [D19], [D20], [D21], [D23], [D24]| F2 - NATURAL JOIN, JOIN USING |
+| F3            |[D7]                 | F3 - CROSS JOIN |
+| F4            |[D8], [D15]          | F4 - LEFT, RIGHT OUTER JOIN |
+| F5            |[D15]                | F5 - FULL (OUTER) JOIN |
+| G1            |[D8], [D12], [D14], [D16], [D25]| G1 - Vnořený dotaz v klauzuli WHERE |
+| G2            |[D4], [D5], [D8], [D10], [D11], [D18], [D19]| G2 - Vnořený dotaz v klauzuli FROM |
+| G3            |[D7], [D13]          | G3 - Vnořený dotaz v klauzuli SELECT |
+| G4            |[D12]                | G4 - Vztažený vnořený dotaz (EXISTS, NOT EXISTS) |
+| H1            |[D2]                 | H1 - Množinové sjednocení - UNION |
+| H2            |[D2], [D3], [D5], [D8], [D22]| H2 - Množinový rozdíl - MINUS (v Oracle) |
+| H3            |[D10]                | H3 - Množinový průnik - INTERSECT |
+| I1            |[D4], [D5], [D6], [D9], [D11], [D23], [D24], [D25]| I1 - Agregační funkce (count,sum,min,max,avg) |
+| I2            |[D4], [D5], [D6]     | I2 - Agregační funkce nad seskupenými řádky - GROUP BY (HAVING) |
+| J             |[D8]                 | J - Stejný dotaz ve třech různých formulacích SQL |
+| K             |[D6]                 | K - Všechny klauzule v 1 dotazu - SELECT FROM WHERE GROUP BY HAVING ORDER BY |
+| L             |[D4], [D24]          | L - VIEW |
+| M             |[D4]                 | M - Dotaz nad pohledem |
+| N             |[D13]                | N - INSERT, který vloží do některé tabulky množinu řádků, které jsou vybrány dotazem z vybraných tabulek (příkaz INSERT, ve kterém je klauzule VALUES nahrazena vnořeným poddotazem. |
+| O             |[D14]                | O - UPDATE s vnořeným SELECT příkazem |
+| P             |[D16]                | P - DELETE s vnořeným SELECT příkazem |
 
 ## Skripty a modely
 
@@ -345,6 +345,30 @@ Ze začátku jsem měl dilema ohledně tématu své semestrální práce. Proto�
 [3] Generátor dat - https://www.generujdata.cz</br>
 
  [D1]: #D1
+ [D2]: #D2
+ [D3]: #D3
+ [D4]: #D4
+ [D5]: #D5
+ [D6]: #D6
+ [D7]: #D7
+ [D8]: #D8
+ [D9]: #D9
+ [D10]: #D10
+ [D11]: #D11
+ [D12]: #D12
+ [D13]: #D13
+ [D14]: #D14
+ [D15]: #D15
+ [D16]: #D16
+ [D17]: #D17
+ [D18]: #D18
+ [D19]: #D19
+ [D20]: #D20
+ [D21]: #D21
+ [D22]: #D22
+ [D23]: #D23
+ [D24]: #D24
+ [D25]: #D25
  [create.sql]: scripts/create.sql
  [insert.sql]: scripts/insert.sql
  [sqldev-sources.zip]: sqldev/sqldev-sources.zip
